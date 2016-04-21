@@ -1,0 +1,50 @@
+/
+/ My first PDP-8 assembly program
+/ Aaron Bonner 20 April 2016
+/ @ajbonner, https://github.com/ajbonner
+/
+
+/ Auto Increment Registers
+/
+            *10             / autoindex register octal range 10-17
+IX1,
+
+/
+/ CODE SECTION
+/
+            *200
+MAIN,       CLA CLL         / clear accumlator and link
+            TAD STR         / move address of STR to the accumulator
+            DCA IX1         / send address to autoindex register IX1
+            JMP LOOP        / start print loop
+DONE,       HLT             / routine exit
+            JMP MAIN        / restart program
+   
+LOOP,       NOP 
+            TAD I IX1       / inc and move contents at address IX1 to accumulator
+            SNA             / if accumulator is 0 jump to DONE
+            JMP DONE        / exit routine
+            JMS TTYOUT      / send contents of accumulator to teletype printer
+            JMP LOOP
+
+TTYOUT,     0               / placeholder for return address set by JMS
+            TLS             / reset printer flag and send accumulator to buffer
+            TSF             / skip next instruction if print flag still set
+            JMP .-1         / keep testing print flag until unset
+            CLA             / clear accumulator
+            JMP I TTYOUT    / junp back to calling routine
+
+/            
+/ DATA SECTION
+/
+            *300            / set memory address to octal 300
+LF,         012             / 10d ASCII Line Feed
+CR,         015             / 13d ASCII Carriage Return
+NUL,        000             / null
+
+STR,        .               / store own memory address in first word
+            "H;"E;"L;"L;"O;" ;"W;"O;"R;"L;"D;"!;    / thanks dmr
+            CR
+            LF
+            NUL 
+$ 
